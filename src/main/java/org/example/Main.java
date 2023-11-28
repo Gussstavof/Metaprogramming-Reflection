@@ -8,9 +8,9 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) {
         UserService service = new UserService();
-        Map<Class<? extends Annotation>, Object> dependencies = new HashMap<>();
+        Map<Class<?>, Object> dependencies = new HashMap<>();
 
-        dependencies.put(Injection.class, new FakeDBRepository());
+        dependencies.put(DBRepository.class, new FakeDBRepository());
 
         dependencyInjection(service, dependencies);
 
@@ -32,10 +32,15 @@ public class Main {
         System.out.println(service.getById(1L).toString());
     }
 
-    public static void dependencyInjection(Object obj, Map<Class<? extends Annotation>, Object> dependencies){
-        dependencies.forEach((annotation, object) -> {
+    public static void dependencyInjection(Object obj, Map<Class<?>, Object> dependencies){
+        dependencies.forEach((type, object) -> {
             Arrays.stream(obj.getClass().getDeclaredFields())
-                    .filter( field -> field.isAnnotationPresent(annotation))
+                    .filter( field -> field.isAnnotationPresent(Injection.class) &&
+                            Arrays.stream(object.getClass().getAnnotatedInterfaces())
+                                    .anyMatch(annotatedType ->
+                                            annotatedType.equals(field.getAnnotatedType())
+                                    )
+                    )
                     .forEach(field -> {
                         try {
                             field.setAccessible(true);
