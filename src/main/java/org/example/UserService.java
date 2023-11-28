@@ -1,7 +1,8 @@
 package org.example;
 
 public class UserService {
-    private DBRepository repository;
+    @Injection
+    DBRepository repository;
 
     public void create(User user) {
         repository.save(user);
