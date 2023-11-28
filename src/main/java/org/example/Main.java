@@ -1,15 +1,30 @@
 package org.example;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
 public class Main {
     public static void main(String[] args) throws Exception {
         UserService service = new UserService();
 
-        var rep = service.getClass().getDeclaredField("repository");
+        Map<Class<? extends Annotation>, Object> dep = new HashMap<>();
 
-        if (rep.isAnnotationPresent(Injection.class)){
-            rep.setAccessible(true);
-            rep.set(service, new FakeDBRepository());
-        }
+        dep.put(Injection.class, new FakeDBRepository());
+
+        dep.forEach((annotation, object) -> {
+            Arrays.stream(service.getClass().getDeclaredFields())
+                    .filter( field -> field.isAnnotationPresent(annotation))
+                    .forEach(field -> {
+                        try {
+                            field.setAccessible(true);
+                            field.set(service, object);
+                        } catch (IllegalAccessException e) {
+                            throw new RuntimeException(e);
+                        }
+                    });
+        });
 
         var method = service.getClass().getDeclaredMethod("getById", Long.class);
         User user = new User(1L, "Gustavo");
