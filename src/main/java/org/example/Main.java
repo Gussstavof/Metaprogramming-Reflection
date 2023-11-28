@@ -12,6 +12,7 @@ public class Main {
         Map<Class<?>, Object> dependencies = new HashMap<>();
 
         dependencies.put(DBRepository.class, new FakeDBRepository());
+        dependencies.put(AuthService.class, new AuthService());
 
         dependencyInjection(service, dependencies);
 
@@ -38,10 +39,14 @@ public class Main {
         dependencies.forEach((type, object) -> {
             Arrays.stream(obj.getClass().getDeclaredFields())
                     .filter( field -> field.isAnnotationPresent(Injection.class) &&
-                            Arrays.stream(object.getClass().getAnnotatedInterfaces())
+                            (
+                                    Arrays.stream(object.getClass().getAnnotatedInterfaces())
                                     .anyMatch(annotatedType ->
                                             annotatedType.equals(field.getAnnotatedType())
-                                    )
+                                    ) ||
+                                    field.getAnnotatedType().toString()
+                                            .equals(object.getClass().getTypeName())
+                            )
                     )
                     .forEach(field -> {
                         try {
