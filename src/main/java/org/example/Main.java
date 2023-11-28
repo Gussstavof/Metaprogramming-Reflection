@@ -8,18 +8,21 @@ import java.util.Map;
 public class Main {
     public static void main(String[] args) {
         UserService service = new UserService();
+
         Map<Class<?>, Object> dependencies = new HashMap<>();
 
         dependencies.put(DBRepository.class, new FakeDBRepository());
 
         dependencyInjection(service, dependencies);
 
-        //var method = service.getClass().getDeclaredMethod("getById", Long.class);
         User user = new User(1L, "Gustavo");
 
         service.create(user);
-        /*
 
+        System.out.println(service.getById(1L).toString());
+
+        /*
+        //var method = service.getClass().getDeclaredMethod("getById", Long.class);
         System.out.println(method.invoke(service,1L));
 
         var fieldName = method.getReturnType().getDeclaredField("name");
@@ -27,9 +30,8 @@ public class Main {
         fieldName.setAccessible(true);
         fieldName.set(user, "Ferreira");
 
-         */
-
         System.out.println(service.getById(1L).toString());
+         */
     }
 
     public static void dependencyInjection(Object obj, Map<Class<?>, Object> dependencies){
