@@ -1,10 +1,10 @@
 package org.example;
 
-public class AuthService {
-    @Injection
-    String str;
-
-    public boolean auth(User user){
-        return user.getName() != null;
+public class AuthService extends AuthAbstract {
+    private static Long id = 0L;
+    @Override
+    protected void idAutoincrement(User user) {
+        id++;
+        user.setId(id);
     }
 }

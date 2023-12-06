@@ -4,10 +4,10 @@ public class UserService {
     @Injection
     DBRepository repository;
     @Injection
-    AuthService authService;
+    AuthAbstract authAbstract;
 
     public void create(User user) {
-        if (!authService.auth(user)){
+        if (!authAbstract.auth(user)){
             throw new RuntimeException("Invalid user");
         }
         repository.save(user);
