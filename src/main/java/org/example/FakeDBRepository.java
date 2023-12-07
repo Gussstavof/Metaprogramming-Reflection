@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class FakeDBRepository implements DBRepository {
-    Map<Long, User> userMap = new HashMap<>();
+    private static final Map<Long, User> userMap = new HashMap<>();
 
     @Override
     public void save(User user) {

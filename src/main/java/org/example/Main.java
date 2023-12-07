@@ -1,13 +1,20 @@
 package org.example;
 
 import org.reflections.Reflections;
+import org.reflections.scanners.FieldAnnotationsScanner;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 
 public class Main {
+    @Injection
+    static UserService service;
+    @Injection
+    static UserService service1;
+
     public static void main(String[] args) throws Exception {
-        UserService service = (UserService) dependencyInjection(UserService.class);
+        getFields();
 
         invoke(
                 UserService.class,
@@ -30,7 +37,7 @@ public class Main {
                         UserService.class,
                         "getById",
                         Long.class,
-                        service,
+                        service1,
                         1L
                 )
         );
@@ -47,18 +54,32 @@ public class Main {
     }
 
     public static Object invoke(Class<?> clazz, String method, Class<?> clazzParam,
-            Object object, Object... args
+                                Object object, Object... args
     ) throws Exception {
         return clazz.getDeclaredMethod(method, clazzParam)
                 .invoke(object, args);
     }
 
-    public static Object dependencyInjection(Class< ? > clazz) throws Exception {
+    public static void getFields() {
+        Reflections reflections = new Reflections("org.example", new FieldAnnotationsScanner());
+        Set<Field> fields = reflections.getFieldsAnnotatedWith(Injection.class);
+
+        fields.forEach(field -> {
+            try {
+                Object obj = field.getDeclaringClass().getConstructor().newInstance();
+                field.set(obj, dependencyInjection(field.getType()));
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public static Object dependencyInjection(Class<?> clazz) throws Exception {
         Object obj = checkAndReturnConstructor(clazz);
 
         Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(Injection.class))
-                .forEach(field-> {
+                .forEach(field -> {
                     try {
                         field.setAccessible(true);
                         field.set(obj, dependencyInjection(field.getType()));
@@ -82,4 +103,5 @@ public class Main {
                 .orElseThrow(RuntimeException::new)
                 .getConstructor().newInstance();
     }
+
 }
