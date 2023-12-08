@@ -2,6 +2,7 @@ package org.example;
 
 import org.reflections.Reflections;
 import org.reflections.scanners.FieldAnnotationsScanner;
+import org.reflections.scanners.Scanners;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -61,7 +62,7 @@ public class Main {
     }
 
     public static void getFields() {
-        Reflections reflections = new Reflections("org.example", new FieldAnnotationsScanner());
+        Reflections reflections = new Reflections("org.example", Scanners.FieldsAnnotated);
         Set<Field> fields = reflections.getFieldsAnnotatedWith(Injection.class);
 
         fields.forEach(field -> {
