@@ -18,7 +18,7 @@ public class Container {
 
         fields.forEach(field -> {
             try {
-                Object obj = checkAndReturnConstructor(field.getDeclaringClass());
+                Object obj = checkAndReturnInstance(field.getDeclaringClass());
                 field.set(obj, dependencyInjection(field.getType()));
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -27,7 +27,7 @@ public class Container {
     }
 
     private static Object dependencyInjection(Class<?> clazz) throws Exception {
-        Object obj = checkAndReturnConstructor(clazz);
+        Object obj = checkAndReturnInstance(clazz);
 
         Arrays.stream(clazz.getDeclaredFields())
                 .filter(field -> field.isAnnotationPresent(Injection.class))
@@ -43,7 +43,7 @@ public class Container {
         return obj;
     }
 
-    private static Object checkAndReturnConstructor(Class<?> type) throws Exception {
+    private static Object checkAndReturnInstance(Class<?> type) throws Exception {
         if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) {
             return searchImpl(type, "org.example");
         }
